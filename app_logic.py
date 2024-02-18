@@ -54,7 +54,7 @@ class AppLogic:
         df= pd.read_csv(''+ruta_archivo+'')
 
         # Configura el path al controlador de Chrome
-        service = Service(executable_path='./chromedriver')
+        service = Service(executable_path='chromedriver.exe')
 
         # Configura las opciones del navegador (puedes ajustar según tus necesidades)
         options = webdriver.ChromeOptions()
@@ -273,7 +273,7 @@ class AppLogic:
         return agente_seleccionado_var.get()
     def abrir_navegador(self, data, nCalls, agente):
         # Configura el path al controlador de Chrome
-        service = Service(executable_path='./chromedriver')
+        service = Service(executable_path='chromedriver.exe')
 
         # Configura las opciones del navegador (puedes ajustar según tus necesidades)
         options = webdriver.ChromeOptions()
