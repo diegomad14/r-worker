@@ -10,6 +10,7 @@ import time
 from selenium.common.exceptions import NoSuchElementException
 import csv
 from tkinter import BooleanVar
+from datetime import datetime
 
 
 contactType_dict={'Buzón':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
@@ -53,32 +54,46 @@ class App(ttk.Frame):
         for index in [0, 1, 2]:
             self.columnconfigure(index=index, weight=1)
             self.rowconfigure(index=index, weight=1)
+        self.var_0 = tk.BooleanVar()
+        self.var_1 = tk.BooleanVar(value=True)
     
         self.setup_widgets()
     def setup_widgets(self):    
         # Create a Frame for the Checkbuttons
-        self.check_frame = ttk.LabelFrame(self, text="Checkbuttons", padding=(20, 10))
+        self.check_frame = ttk.LabelFrame(self, text="Opciones Forms", padding=(20, 10))
         self.check_frame.grid(
+            row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
+        )
+        # Checkbuttons
+        self.check_1 = ttk.Checkbutton(
+            self.check_frame, text="Llamada", variable=self.var_0
+        )
+        self.check_1.grid(row=0, column=0, padx=5, pady=10, sticky="nsew")
+
+        self.check_2 = ttk.Checkbutton(
+            self.check_frame, text="Whats", variable=self.var_1
+        )
+        self.check_2.grid(row=0, column=1, padx=5, pady=10, sticky="nsew")
+
+        # Create a Frame for the entryFrame
+        self.entry_frame = ttk.LabelFrame(self, text="Archivo Maestro", padding=(20, 10))
+        self.entry_frame.grid(
             row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
         )
-        # Crear y posicionar los elementos en la ventana principal
-        label_instrucciones = tk.Label(self, text="Instrucciones de la aplicación:\n1. Carga el archivo CSV.\n2. Presiona el botón 'Procesar Datos' para comenzar el trabajo.")
-        label_instrucciones.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
+        label_ruta = ttk.Label(self.entry_frame, text="Ruta del archivo CSV:")
+        label_ruta.grid(row=0, column=0, padx=10, pady=10)
 
-        label_ruta = ttk.Label(self, text="Ruta del archivo CSV:")
-        label_ruta.grid(row=1, column=0, padx=10, pady=10)
+        self.entry_ruta = ttk.Entry(self.entry_frame, width=50)
+        self.entry_ruta.grid(row=0, column=1, padx=10, pady=10)
 
-        self.entry_ruta = ttk.Entry(self, width=50)
-        self.entry_ruta.grid(row=1, column=1, padx=10, pady=10)
+        boton_cargar = ttk.Button(self.entry_frame, text="Cargar Archivo", command=self.cargar_archivo)
+        boton_cargar.grid(row=0, column=2, padx=10, pady=10)
 
-        boton_cargar = ttk.Button(self, text="Cargar Archivo", command=self.cargar_archivo)
-        boton_cargar.grid(row=1, column=2, padx=10, pady=10)
-
-        boton_procesar = ttk.Button(self, text="Procesar Datos", command=self.procesar_datos)
+        boton_procesar = ttk.Button(self.entry_frame, text="Procesar Datos", command=self.procesar_datos)
         boton_procesar.grid(row=3, column=2, columnspan=1, pady=10)
         
-        boton_llenar_forms = ttk.Button(self, text="Llenar Forms", command=self.llenar_forms)
-        boton_llenar_forms.grid(row=3, column=0, columnspan=1, pady=10)
+        boton_llenar_forms = ttk.Button(self.check_frame, text="Llenar Forms", command=self.llenar_forms)
+        boton_llenar_forms.grid(row=1, column=0, columnspan=1, pady=10)
 
     def llenar_forms(self):
         ruta_archivo = self.entry_ruta.get()
@@ -94,94 +109,101 @@ class App(ttk.Frame):
         # Crea una instancia del navegador Chrome
         driver = webdriver.Chrome(service=service, options=options)
 
-        # Navega a la página de lupe.rappi.com
+        # Navega a la página del formulario
         driver.get('https://docs.google.com/forms/d/e/1FAIpQLSdlsZY3VlD7CfqiB9Ftm4X8cEuvpVU76D-Ku8u9NNhu_Z5FYg/viewform')
 
         messagebox.showinfo("Proceso completado","En cuanto inicie sesión por favor dar click aquí")
+        try:        
+            for row, data in df.iterrows():
+                zcrm = data['ZCRM']
+                storeID= data['Store ID']
+                contactB = data['Contestó?']
+                callsPE = data['que problemas calls?']
+                chatPE = data['Problemas Whats?']
+                falta = data['Estado']
+                if self.var_0.get():
+                    #Llamada
+                    driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
+                    if pd.isna(storeID):
+                        time.sleep(1)
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #set nombre
+                    else:
+                        time.sleep(1)
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                    time.sleep(1)
+                    if contactB == 'No' and pd.isna(callsPE):
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
+                        time.sleep(1)
+                    elif contactB == 'No' and not pd.isna(callsPE):
+                        driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
+                        time.sleep(1)
+                    elif contactB == 'Si' and pd.isna(callsPE):
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
+                        time.sleep(1)
+                    elif contactB == 'Si' and not pd.isna(callsPE):
+                        driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
+                        time.sleep(1)
 
-        for row, data in df.iterrows():
-            zcrm = data['ZCRM']
-            storeID= data['Store ID']
-            contactB = data['Contestó?']
-            callsPE = data['que problemas calls?']
-            chatPE = data['Problemas Whats?']
-            falta = data['Estado']
-            #Llamada
-            driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
-            if pd.isna(storeID):
-                time.sleep(1)
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #set nombre
-            else:
-                time.sleep(1)
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
-            driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
-            time.sleep(1)
-            if contactB == 'No' and pd.isna(callsPE):
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
-                time.sleep(1)
-            elif contactB == 'No' and not pd.isna(callsPE):
-                driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
-                time.sleep(1)
-            elif contactB == 'Si' and pd.isna(callsPE):
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
-                time.sleep(1)
-            elif contactB == 'Si' and not pd.isna(callsPE):
-                driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
-                time.sleep(1)
+                    # Separa las columnas que faltan
+                    columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
 
-            # Separa las columnas que faltan
-            columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
+                    # Itera sobre las columnas que faltan y completa el formulario
+                    for columna in columnas_faltantes:
+                        # Supongamos que el formulario tiene un campo de entrada para cada columna
+                        
+                        if columna=='nan':
+                            driver.find_element('xpath',contactFalta['']).click()
+                        else:
+                            driver.find_element('xpath',contactFalta[columna]).click()
 
-            # Itera sobre las columnas que faltan y completa el formulario
-            for columna in columnas_faltantes:
-                # Supongamos que el formulario tiene un campo de entrada para cada columna
-                
-                if columna=='nan':
-                    driver.find_element('xpath',contactFalta['']).click()
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
+                    time.sleep(1)
+                    #
+                    driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
+                elif self.var_1.get():
+                    #WhatsApp
+                    driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
+                    time.sleep(1)
+                    if pd.isna(storeID):
+                        time.sleep(1)
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #put nombre
+                    else:
+                        time.sleep(1)
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                    time.sleep(1)
+                    if pd.isna(chatPE):
+                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
+                        time.sleep(1)
+                    elif not pd.isna(chatPE):
+                        driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
+                        time.sleep(1)
+                    
+
+                    # Separa las columnas que faltan
+                    columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
+
+                    # Itera sobre las columnas que faltan y completa el formulario
+                    for columna in columnas_faltantes:
+                        # Supongamos que el formulario tiene un campo de entrada para cada columna
+                        if columna=='nan':
+                            driver.find_element('xpath',contactFalta['']).click()
+                        else:
+                            driver.find_element('xpath',contactFalta[columna]).click()
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
+                    time.sleep(1)
+                    driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
+                    time.sleep(1)
                 else:
-                    driver.find_element('xpath',contactFalta[columna]).click()
-
-            time.sleep(1)
-            driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
-            driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
-            time.sleep(1)
-            #
-            driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
-            #WhatsApp
-            driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
-            time.sleep(1)
-            if pd.isna(storeID):
-                time.sleep(1)
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #put nombre
-            else:
-                time.sleep(1)
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
-            driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
-            time.sleep(1)
-            if pd.isna(chatPE):
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
-                time.sleep(1)
-            elif not pd.isna(chatPE):
-                driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
-                time.sleep(1)
-            
-
-            # Separa las columnas que faltan
-            columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
-
-            # Itera sobre las columnas que faltan y completa el formulario
-            for columna in columnas_faltantes:
-                # Supongamos que el formulario tiene un campo de entrada para cada columna
-                if columna=='nan':
-                    driver.find_element('xpath',contactFalta['']).click()
-                else:
-                    driver.find_element('xpath',contactFalta[columna]).click()
-            time.sleep(1)
-            driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
-            driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
-            time.sleep(1)
-            driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
-            time.sleep(1)
+                    driver.quit()
+        except NoSuchElementException:
+            messagebox.showerror("Error", "Error al llenar los forms")
+            driver.quit()
     def cargar_archivo(self):
         ruta_archivo = filedialog.askopenfilename(title="Seleccionar archivo CSV", filetypes=[("Archivos CSV", "*.csv")])
         if ruta_archivo:
@@ -217,7 +239,7 @@ class App(ttk.Frame):
 
             # Pregunta cuántas llamadas hará la persona
             llamadas = simpledialog.askinteger("Cantidad de llamadas", f"¿Cuántas llamadas hará {agente_seleccionado}? (Max {num_filas})")
-            self.abrir_navegador(data=datos_filtrados, nCalls=llamadas, agente=agente_seleccionado)
+            self.mostrar_datos_relevantes(data=datos_filtrados, nCalls=llamadas, agente=agente_seleccionado)
 
         except Exception as e:
             messagebox.showerror("Error", f"Error al procesar los datos: {str(e)}")
@@ -257,25 +279,9 @@ class App(ttk.Frame):
 
         # Devolver el agente seleccionado
         return agente_seleccionado_var.get()
-    def abrir_navegador(self, data, nCalls, agente):
-        # Configura el path al controlador de Chrome
-        service = Service(executable_path='./chromedriver')
-
-        # Configura las opciones del navegador (puedes ajustar según tus necesidades)
-        options = webdriver.ChromeOptions()
-        options.add_argument('--start-maximized')  # Inicia la ventana maximizada
-
-        # Crea una instancia del navegador Chrome
-        driver = webdriver.Chrome(service=service, options=options)
-
-        # Navega a la página de lupe.rappi.com
-        driver.get('https://lupe.rappi.com/')
-        messagebox.showinfo("Alerta","Al iniciar sesión hacer click aquí")
-       # Crea una nueva ventana Tkinter para mostrar datos relevantes
-        self.mostrar_datos_relevantes(data, nCalls=nCalls, agente=agente, driver=driver)
 
 
-    def mostrar_datos_relevantes(self, data, nCalls, agente, driver):
+    def mostrar_datos_relevantes(self, data, nCalls, agente):
         # Crear una nueva ventana de Tkinter
         ventana_datos_relevantes = tk.Toplevel(self)
         ventana_datos_relevantes.title("Datos Relevantes")
@@ -302,7 +308,7 @@ class App(ttk.Frame):
         ventana_datos_relevantes.bind_all("<MouseWheel>", self.on_mousewheel)
 
         # Botón "Enviar WhatsApps" en la parte superior izquierda
-        boton_whatsapp = ttk.Button(frame_datos, text="Enviar WhatsApps", command=lambda: self.sendWhats(database=data, agente=agente, nCalls=nCalls,driver=driver))
+        boton_whatsapp = ttk.Button(frame_datos, text="Enviar WhatsApps", command=lambda: self.sendWhats(database=data, agente=agente, nCalls=nCalls))
         boton_whatsapp.grid(row=0, column=0, columnspan=3, pady=10, padx=10, sticky="w")
         
         # Botón para exportar CSV
@@ -314,7 +320,7 @@ class App(ttk.Frame):
         label_seleccionar.grid(row=1, column=5, padx=10, pady=5)
 
         # Problemas Whats boolean
-        label_seleccionar = ttk.Label(frame_datos, text="¿Problemas Whats?")
+        label_seleccionar = ttk.Label(frame_datos, text="¿Contacto WhatsApp?")
         label_seleccionar.grid(row=1, column=6, padx=10, pady=5)
 
         entry_widgets = []
@@ -378,20 +384,19 @@ class App(ttk.Frame):
 
             # Agregar columna "Entry problemas call"
             stringPCall_var = tk.StringVar()
-            entry_problemasCall = ttk.OptionMenu(frame_datos,stringPCall_var, *['','Buzón','No enlaza llamada','Fuera de servicio','Número no existe','Llamada sin audio','Número equivocado','Cuelga llamada','Volver a llamar', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
+            entry_problemasCall = ttk.OptionMenu(frame_datos,stringPCall_var, *['','','Buzón','No enlaza llamada','Fuera de servicio','Número no existe','Llamada sin audio','Número equivocado','Cuelga llamada','Volver a llamar', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
             entry_problemasCall.config(width=5)
-            entry_problemasCall.grid(row=call * 4 + 2, column=5, padx=0, pady=0)
+            entry_problemasCall.grid(row=call * 4 + 2, column=5, padx=10, pady=10)
             entry_problemasCall.nombre_opcion = "problemas_call"
-            entry_problemasCall.tk.call("set_theme", "light")
             entry_widgets.append(entry_problemasCall)
             stringPCall_vars.append(stringPCall_var)
 
 
             # Agregar columna "Entry problemas Whats"
             stringPWhats_var = tk.StringVar()
-            entry_problemasWhats = ttk.OptionMenu(frame_datos, stringPWhats_var, *['', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
+            entry_problemasWhats = ttk.OptionMenu(frame_datos, stringPWhats_var, *['','','Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
             entry_problemasWhats.config(width=5)
-            entry_problemasWhats.grid(row=call * 4 + 2, column=6, padx=0, pady=0)
+            entry_problemasWhats.grid(row=call * 4 + 2, column=6, padx=10, pady=10)
             entry_problemasWhats.nombre_opcion = "problemas_whats"
             entry_widgets.append(entry_problemasWhats)
             stringPWhats_vars.append(stringPWhats_var)
@@ -432,13 +437,19 @@ class App(ttk.Frame):
         return ', '.join(columnas_no)
 
 
-    def sendWhats(self, database, agente, nCalls, driver):
+    def sendWhats(self, database, agente, nCalls):
+        # Configura el path al controlador de Chrome
+        service = Service(executable_path='./chromedriver')
+
+        # Configura las opciones del navegador (puedes ajustar según tus necesidades)
+        options = webdriver.ChromeOptions()
+        options.add_argument('--start-maximized')  # Inicia la ventana maximizada
+
+        # Crea una instancia del navegador Chrome
+        driver = webdriver.Chrome(service=service, options=options)
 
         # Abre una nueva pestaña en el navegador con la página https://sales.treble.ai/
-        driver.execute_script("window.open('https://sales.treble.ai/', '_blank')")
-
-        # Cambia el enfoque a la nueva pestaña
-        driver.switch_to.window(driver.window_handles[1])
+        driver.get('https://sales.treble.ai/')
 
         messagebox.showinfo("WhatsApp", "Al iniciar sesión en treble por favor dar click en Ok")
         time.sleep(1)
@@ -578,10 +589,14 @@ class App(ttk.Frame):
                 time.sleep(1)
             #Se repite :D
     def exportar_a_csv(self, entry_widgets, nCalls, checkbutton_vars, data, stringPCall_vars, stringPWhats_vars):
+            # Generar un nombre sugerido basado en la fecha y hora actual
+        nombre_sugerido = "datos_relevantes_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"
 
-        # Nombre del archivo CSV
-        nombre_archivo = "datos_relevantes.csv"
-
+            # Mostrar el diálogo de guardado de archivo con el nombre sugerido
+        nombre_archivo = filedialog.asksaveasfilename(defaultextension=".csv", initialfile=nombre_sugerido, filetypes=[("Archivos CSV", "*.csv")])
+            
+        if not nombre_archivo:  # Si el usuario cancela la operación de guardado
+            return
         # Lista para almacenar los datos
         datos_exportar = []
 
@@ -603,7 +618,7 @@ class App(ttk.Frame):
                 if isinstance(entry_widget, tk.Entry):
                     valor = entry_widget.get()
                     fila_datos.append(valor)
-                elif isinstance(entry_widget, tk.Label):
+                elif isinstance(entry_widget, ttk.Label):
                     valor = entry_widget.cget("text")
                     fila_datos.append(valor)
                 elif isinstance(entry_widget, ttk.Progressbar):
