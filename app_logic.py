@@ -5,7 +5,6 @@ from tkinter import filedialog, messagebox
 from tkinter import simpledialog
 from selenium.webdriver.chrome.service import Service
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from tkinter import ttk, Scrollbar, Entry
 import time
 from selenium.common.exceptions import NoSuchElementException
@@ -48,7 +47,39 @@ contactFalta = {
 }
 
 
-class AppLogic:
+class App(ttk.Frame):
+    def __init__(self, parent):
+        ttk.Frame.__init__(self)
+        for index in [0, 1, 2]:
+            self.columnconfigure(index=index, weight=1)
+            self.rowconfigure(index=index, weight=1)
+    
+        self.setup_widgets()
+    def setup_widgets(self):    
+        # Create a Frame for the Checkbuttons
+        self.check_frame = ttk.LabelFrame(self, text="Checkbuttons", padding=(20, 10))
+        self.check_frame.grid(
+            row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
+        )
+        # Crear y posicionar los elementos en la ventana principal
+        label_instrucciones = tk.Label(self, text="Instrucciones de la aplicación:\n1. Carga el archivo CSV.\n2. Presiona el botón 'Procesar Datos' para comenzar el trabajo.")
+        label_instrucciones.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
+
+        label_ruta = ttk.Label(self, text="Ruta del archivo CSV:")
+        label_ruta.grid(row=1, column=0, padx=10, pady=10)
+
+        self.entry_ruta = ttk.Entry(self, width=50)
+        self.entry_ruta.grid(row=1, column=1, padx=10, pady=10)
+
+        boton_cargar = ttk.Button(self, text="Cargar Archivo", command=self.cargar_archivo)
+        boton_cargar.grid(row=1, column=2, padx=10, pady=10)
+
+        boton_procesar = ttk.Button(self, text="Procesar Datos", command=self.procesar_datos)
+        boton_procesar.grid(row=3, column=2, columnspan=1, pady=10)
+        
+        boton_llenar_forms = ttk.Button(self, text="Llenar Forms", command=self.llenar_forms)
+        boton_llenar_forms.grid(row=3, column=0, columnspan=1, pady=10)
+
     def llenar_forms(self):
         ruta_archivo = self.entry_ruta.get()
         df= pd.read_csv(''+ruta_archivo+'')
@@ -75,7 +106,7 @@ class AppLogic:
             callsPE = data['que problemas calls?']
             chatPE = data['Problemas Whats?']
             falta = data['Estado']
-            
+            #Llamada
             driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
             if pd.isna(storeID):
                 time.sleep(1)
@@ -151,56 +182,11 @@ class AppLogic:
             time.sleep(1)
             driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
             time.sleep(1)
-    def __init__(self, master):
-        def cargar_archivo():
-            ruta_archivo = filedialog.askopenfilename(title="Seleccionar archivo CSV", filetypes=[("Archivos CSV", "*.csv")])
-            if ruta_archivo:
-                self.entry_ruta.delete(0, tk.END)
-                self.entry_ruta.insert(0, ruta_archivo)
-
-        def cambio_ventana():
-            self.ventana_carga.destroy()  # Cerrar la ventana de carga
-            self.ventana_principal.deiconify()  # Mostrar la ventana principal
-        # Crear la ventana de carga
-        self.ventana_carga = tk.Tk()
-        self.ventana_carga.title("Cargando...")
-
-        # Puedes personalizar la pantalla de carga según tus necesidades
-        label_carga = tk.Label(self.ventana_carga, text="Cargando la aplicación, por favor espera...")
-        label_carga.pack(pady=50)
-
-        # Mostrar la ventana de carga
-        self.ventana_carga.update()
-        self.ventana_carga.after(1000, cambio_ventana)  # Después de 5 segundos, ejecutar la función cambio_ventana
-
-        # Crear la ventana principal
-        self.ventana_principal = master
-        self.ventana_principal.withdraw()
-        self.ventana_principal.title("Automatización Rappi")
-        # Ocultar la ventana principal al inicio
-
-
-        # Crear y posicionar los elementos en la ventana principal
-        label_instrucciones = tk.Label(self.ventana_principal, text="Instrucciones de la aplicación:\n1. Carga el archivo CSV.\n2. Presiona el botón 'Procesar Datos' para comenzar el trabajo.")
-        label_instrucciones.grid(row=0, column=0, columnspan=3, padx=10, pady=10)
-
-        label_ruta = tk.Label(self.ventana_principal, text="Ruta del archivo CSV:")
-        label_ruta.grid(row=1, column=0, padx=10, pady=10)
-
-        self.entry_ruta = tk.Entry(self.ventana_principal, width=50)
-        self.entry_ruta.grid(row=1, column=1, padx=10, pady=10)
-
-        boton_cargar = tk.Button(self.ventana_principal, text="Cargar Archivo", command=cargar_archivo)
-        boton_cargar.grid(row=1, column=2, padx=10, pady=10)
-
-        boton_procesar = tk.Button(self.ventana_principal, text="Procesar Datos", command=self.procesar_datos)
-        boton_procesar.grid(row=3, column=2, columnspan=1, pady=10)
-        
-        boton_llenar_forms = tk.Button(self.ventana_principal, text="Llenar Forms", command=self.llenar_forms)
-        boton_llenar_forms.grid(row=3, column=0, columnspan=1, pady=10)
-
-        # Iniciar el bucle principal de la interfaz gráfica
-        self.ventana_principal.mainloop()
+    def cargar_archivo(self):
+        ruta_archivo = filedialog.askopenfilename(title="Seleccionar archivo CSV", filetypes=[("Archivos CSV", "*.csv")])
+        if ruta_archivo:
+            self.entry_ruta.delete(0, tk.END)
+            self.entry_ruta.insert(0, ruta_archivo)
     def procesar_datos(self):
         # Lógica para procesar los datos
         ruta_archivo = self.entry_ruta.get()
@@ -246,10 +232,10 @@ class AppLogic:
             ventana_elegir_agente.destroy()
 
         # Mostrar una ventana con una lista de agentes y permitir al usuario elegir uno
-        ventana_elegir_agente = tk.Toplevel(self.ventana_principal)
+        ventana_elegir_agente = tk.Toplevel(self)
         ventana_elegir_agente.title("Elegir Agente")
 
-        label_instrucciones = tk.Label(ventana_elegir_agente, text="Selecciona un agente:")
+        label_instrucciones = ttk.Label(ventana_elegir_agente, text="Selecciona un agente:")
         label_instrucciones.pack(pady=10)
 
         # Cuadro de lista para mostrar los agentes
@@ -259,7 +245,7 @@ class AppLogic:
         lista_agentes.pack(pady=10)
 
         # Botón para confirmar la selección
-        boton_confirmar = tk.Button(
+        boton_confirmar = ttk.Button(
             ventana_elegir_agente,
             text="Confirmar",
             command=confirmar_seleccion
@@ -291,7 +277,7 @@ class AppLogic:
 
     def mostrar_datos_relevantes(self, data, nCalls, agente, driver):
         # Crear una nueva ventana de Tkinter
-        ventana_datos_relevantes = tk.Toplevel(self.ventana_principal)
+        ventana_datos_relevantes = tk.Toplevel(self)
         ventana_datos_relevantes.title("Datos Relevantes")
         ventana_datos_relevantes.geometry("1150x600")
 
@@ -316,19 +302,19 @@ class AppLogic:
         ventana_datos_relevantes.bind_all("<MouseWheel>", self.on_mousewheel)
 
         # Botón "Enviar WhatsApps" en la parte superior izquierda
-        boton_whatsapp = tk.Button(frame_datos, text="Enviar WhatsApps", command=lambda: self.sendWhats(database=data, agente=agente, nCalls=nCalls,driver=driver))
+        boton_whatsapp = ttk.Button(frame_datos, text="Enviar WhatsApps", command=lambda: self.sendWhats(database=data, agente=agente, nCalls=nCalls,driver=driver))
         boton_whatsapp.grid(row=0, column=0, columnspan=3, pady=10, padx=10, sticky="w")
         
         # Botón para exportar CSV
-        boton_exportar_csv = tk.Button(frame_datos, text="Exportar CSV", command=lambda: self.exportar_a_csv(entry_widgets, nCalls, checkbutton_vars, data, stringPCall_vars, stringPWhats_vars))
+        boton_exportar_csv = ttk.Button(frame_datos, text="Exportar CSV", command=lambda: self.exportar_a_csv(entry_widgets, nCalls, checkbutton_vars, data, stringPCall_vars, stringPWhats_vars))
         boton_exportar_csv.grid(row=0, column=1, pady=10, padx=10, sticky="e")
 
         # Problemas call boolean
-        label_seleccionar = tk.Label(frame_datos, text="¿Problemas call?")
+        label_seleccionar = ttk.Label(frame_datos, text="¿Problemas call?")
         label_seleccionar.grid(row=1, column=5, padx=10, pady=5)
 
         # Problemas Whats boolean
-        label_seleccionar = tk.Label(frame_datos, text="¿Problemas Whats?")
+        label_seleccionar = ttk.Label(frame_datos, text="¿Problemas Whats?")
         label_seleccionar.grid(row=1, column=6, padx=10, pady=5)
 
         entry_widgets = []
@@ -340,22 +326,22 @@ class AppLogic:
             for i, columna in enumerate(["Onboarding Name", "Telefono 1", "Store ID"]):
                 # Evitar la repetición de los nombres de las columnas
                 if call == 0:
-                    label_columna = tk.Label(frame_datos, text=columna)
+                    label_columna = ttk.Label(frame_datos, text=columna)
                     label_columna.grid(row=call * 4 + 1, column=i, padx=10, pady=5)
 
             # Agregar Label encima de "Comentarios"
-            label_comentarios = tk.Label(frame_datos, text="Comentarios")
+            label_comentarios = ttk.Label(frame_datos, text="Comentarios")
             label_comentarios.grid(row=1, column=3, padx=10, pady=5)
 
             # Agregar Label encima de "¿Contestó?"
-            label_contesto = tk.Label(frame_datos, text="¿Contestó?")
+            label_contesto = ttk.Label(frame_datos, text="¿Contestó?")
             label_contesto.grid(row=1, column=4, padx=0, pady=0)
             
 
             for i, columna in enumerate(["Onboarding Name", "Telefono 1", "Store ID"]):
             # Evitar la repetición de los nombres de las columnas
                 if call == 0:
-                    label_columna = tk.Label(frame_datos, text=columna)
+                    label_columna = ttk.Label(frame_datos, text=columna)
                     label_columna.grid(row=call * 4 + 1, column=i, padx=10, pady=5)
 
                 # Obtener los datos relevantes de la fila correspondiente al número de llamada
@@ -380,29 +366,30 @@ class AppLogic:
             process_bar.grid(row=call * 4 + 2, column=7, padx=0, pady=0)
             entry_widgets.append(process_bar)
 
-            label_datos_Faltantes = tk.Label(frame_datos, text="Falta: "+self.obtener_columnas_no(data.iloc[call]))
+            label_datos_Faltantes = ttk.Label(frame_datos, text="Falta: "+self.obtener_columnas_no(data.iloc[call]))
             label_datos_Faltantes.grid_remove()
             entry_widgets.append(label_datos_Faltantes)
 
             checkbutton_var = BooleanVar(value=False)
-            checkbutton = tk.Checkbutton(frame_datos, variable=checkbutton_var)
+            checkbutton = ttk.Checkbutton(frame_datos, variable=checkbutton_var)
             checkbutton.grid(row=call * 4 + 2, column=4, padx=0, pady=0)
             entry_widgets.append(checkbutton)
             checkbutton_vars.append(checkbutton_var)
 
             # Agregar columna "Entry problemas call"
             stringPCall_var = tk.StringVar()
-            entry_problemasCall = tk.OptionMenu(frame_datos,stringPCall_var, *['','Buzón','No enlaza llamada','Fuera de servicio','Número no existe','Llamada sin audio','Número equivocado','Cuelga llamada','Volver a llamar', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
+            entry_problemasCall = ttk.OptionMenu(frame_datos,stringPCall_var, *['','Buzón','No enlaza llamada','Fuera de servicio','Número no existe','Llamada sin audio','Número equivocado','Cuelga llamada','Volver a llamar', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
             entry_problemasCall.config(width=5)
             entry_problemasCall.grid(row=call * 4 + 2, column=5, padx=0, pady=0)
             entry_problemasCall.nombre_opcion = "problemas_call"
+            entry_problemasCall.tk.call("set_theme", "light")
             entry_widgets.append(entry_problemasCall)
             stringPCall_vars.append(stringPCall_var)
 
 
             # Agregar columna "Entry problemas Whats"
             stringPWhats_var = tk.StringVar()
-            entry_problemasWhats = tk.OptionMenu(frame_datos, stringPWhats_var, *['', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
+            entry_problemasWhats = ttk.OptionMenu(frame_datos, stringPWhats_var, *['', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
             entry_problemasWhats.config(width=5)
             entry_problemasWhats.grid(row=call * 4 + 2, column=6, padx=0, pady=0)
             entry_problemasWhats.nombre_opcion = "problemas_whats"
@@ -621,10 +608,10 @@ class AppLogic:
                     fila_datos.append(valor)
                 elif isinstance(entry_widget, ttk.Progressbar):
                     valor=None
-                elif isinstance(entry_widget, tk.Checkbutton):
+                elif isinstance(entry_widget, ttk.Checkbutton):
                     valor = 'Si' if checkbutton_vars[call].get() else 'No'
                     fila_datos.append(valor)
-                elif isinstance(entry_widget, tk.OptionMenu):
+                elif isinstance(entry_widget, ttk.OptionMenu):
                     if entry_widget.nombre_opcion == "problemas_call":
                         valor = stringPCall_vars[call].get()
                         fila_datos.append(valor)
@@ -647,7 +634,21 @@ class AppLogic:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = AppLogic(root)
+    root.title("")
+
+    # Simply set the theme
+    root.tk.call("source", "Azure/azure.tcl")
+    root.tk.call("set_theme", "light")
+
+    app = App(root)
+    app.pack(fill="both", expand=True)
+
+    # Set a minsize for the window, and place it in the middle
+    root.update()
+    root.minsize(root.winfo_width(), root.winfo_height())
+    x_cordinate = int((root.winfo_screenwidth() / 2) - (root.winfo_width() / 2))
+    y_cordinate = int((root.winfo_screenheight() / 2) - (root.winfo_height() / 2))
+    root.geometry("+{}+{}".format(x_cordinate, y_cordinate-20))
 
     root.mainloop()
 
