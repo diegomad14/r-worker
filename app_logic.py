@@ -121,7 +121,7 @@ class App(ttk.Frame):
         df= pd.read_csv(''+ruta_archivo+'')
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        driver_path = os.path.join(script_dir, "chromedriver")
+        driver_path = os.path.join(script_dir, "chromedriver.exe")
         # Configura el path al controlador de Chrome
         service = Service(executable_path=driver_path)
 
@@ -534,7 +534,7 @@ class App(ttk.Frame):
 
     def sendWhats(self, database, agente, nCalls):
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        driver_path = os.path.join(script_dir, "chromedriver")
+        driver_path = os.path.join(script_dir, "chromedriver.exe")
         # Configura el path al controlador de Chrome
         service = Service(executable_path=driver_path)
 
