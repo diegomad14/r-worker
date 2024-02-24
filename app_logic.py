@@ -12,6 +12,7 @@ import csv
 from tkinter import BooleanVar
 from datetime import datetime
 from PIL import Image, ImageTk
+import os
 
 
 contactType_dict={'Buzón':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
@@ -80,9 +81,10 @@ class App(ttk.Frame):
         self.entry_frame = ttk.LabelFrame(self, text="Archivo Maestro", padding=(20, 10))
         self.entry_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
         
-
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        image_path = os.path.join(script_dir, "logo.png")
         # Load the logo image
-        logo_image = Image.open("logo.png")
+        logo_image = Image.open(image_path)
         logo_photo = logo_image.resize((70, 70), Image.Resampling.LANCZOS)
 
         # Convert the image to Tkinter-compatible format
@@ -116,9 +118,10 @@ class App(ttk.Frame):
     def llenar_forms(self):
         ruta_archivo = self.entry_ruta.get()
         df= pd.read_csv(''+ruta_archivo+'')
-
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        driver_path = os.path.join(script_dir, "chromedriver")
         # Configura el path al controlador de Chrome
-        service = Service(executable_path='./chromedriver')
+        service = Service(executable_path=driver_path)
 
         # Configura las opciones del navegador (puedes ajustar según tus necesidades)
         options = webdriver.ChromeOptions()
@@ -528,8 +531,10 @@ class App(ttk.Frame):
 
 
     def sendWhats(self, database, agente, nCalls):
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        driver_path = os.path.join(script_dir, "chromedriver")
         # Configura el path al controlador de Chrome
-        service = Service(executable_path='./chromedriver')
+        service = Service(executable_path=driver_path)
 
         # Configura las opciones del navegador (puedes ajustar según tus necesidades)
         options = webdriver.ChromeOptions()
@@ -737,13 +742,20 @@ class App(ttk.Frame):
 
         messagebox.showinfo("Exportación exitosa", f"Datos exportados a {nombre_archivo}")
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     root.title("")
 
-    # Simply set the theme
-    root.tk.call("source", "Azure/azure.tcl")
-    root.tk.call("set_theme", "light")
+    # Obtener la ruta del directorio donde se encuentra este script
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    theme_file = os.path.join(script_dir, "Azure", "azure.tcl")
+
+    # Verificar si el archivo de tema existe antes de cargarlo
+    if os.path.exists(theme_file):
+        root.tk.call("source", theme_file)
+        root.tk.call("set_theme", "light")
+    else:
+        print("¡Error! No se pudo encontrar el archivo de tema.")
 
     app = App(root)
     app.pack(fill="both", expand=True)
@@ -756,6 +768,9 @@ if __name__ == "__main__":
     root.geometry("+{}+{}".format(x_cordinate, y_cordinate-20))
 
     root.mainloop()
+
+if __name__ == "__main__":
+    main()
 
 
 
