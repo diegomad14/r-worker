@@ -369,25 +369,6 @@ class App(ttk.Frame):
 
         # Devolver el agente seleccionado
         return agente_seleccionado_var.get()
-<<<<<<< HEAD
-    def abrir_navegador(self, data, nCalls, agente):
-        # Configura el path al controlador de Chrome
-        service = Service(executable_path='chromedriver.exe')
-
-        # Configura las opciones del navegador (puedes ajustar según tus necesidades)
-        options = webdriver.ChromeOptions()
-        options.add_argument('--start-maximized')  # Inicia la ventana maximizada
-
-        # Crea una instancia del navegador Chrome
-        driver = webdriver.Chrome(service=service, options=options)
-
-        # Navega a la página de lupe.rappi.com
-        driver.get('https://lupe.rappi.com/')
-        messagebox.showinfo("Alerta","Al iniciar sesión hacer click aquí")
-       # Crea una nueva ventana Tkinter para mostrar datos relevantes
-        self.mostrar_datos_relevantes(data, nCalls=nCalls, agente=agente, driver=driver)
-=======
->>>>>>> main
 
 
     def mostrar_datos_relevantes(self, data, nCalls, agente):
@@ -548,7 +529,7 @@ class App(ttk.Frame):
 
     def sendWhats(self, database, agente, nCalls):
         # Configura el path al controlador de Chrome
-        service = Service(executable_path='./chromedriver')
+        service = Service(executable_path='./chromedriver.exe')
 
         # Configura las opciones del navegador (puedes ajustar según tus necesidades)
         options = webdriver.ChromeOptions()
