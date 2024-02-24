@@ -375,7 +375,7 @@ class App(ttk.Frame):
         # Crear una nueva ventana de Tkinter
         ventana_datos_relevantes = tk.Toplevel(self)
         ventana_datos_relevantes.title("Datos Relevantes")
-        ventana_datos_relevantes.geometry("1150x600")
+        ventana_datos_relevantes.geometry("980x300")
 
         # Crear un canvas para la barra de desplazamiento
         self.canvas = tk.Canvas(ventana_datos_relevantes)
