@@ -11,6 +11,7 @@ from selenium.common.exceptions import NoSuchElementException
 import csv
 from tkinter import BooleanVar
 from datetime import datetime
+from PIL import Image, ImageTk
 
 
 contactType_dict={'Buzón':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
@@ -58,13 +59,13 @@ class App(ttk.Frame):
         self.var_1 = tk.BooleanVar(value=True)
     
         self.setup_widgets()
-    def setup_widgets(self):    
-        # Create a Frame for the Checkbuttons
+    def setup_widgets(self):   
+        # Create a Frame for the Opciones forms
         self.check_frame = ttk.LabelFrame(self, text="Opciones Forms", padding=(20, 10))
         self.check_frame.grid(
             row=2, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
         )
-        # Checkbuttons
+        # Opciones Forms
         self.check_1 = ttk.Checkbutton(
             self.check_frame, text="Llamada", variable=self.var_0
         )
@@ -77,23 +78,40 @@ class App(ttk.Frame):
 
         # Create a Frame for the entryFrame
         self.entry_frame = ttk.LabelFrame(self, text="Archivo Maestro", padding=(20, 10))
-        self.entry_frame.grid(
-            row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew"
-        )
+        self.entry_frame.grid(row=0, column=0, padx=(20, 10), pady=(20, 10), sticky="nsew")
+        
+
+        # Load the logo image
+        logo_image = Image.open("logo.png")
+        logo_photo = logo_image.resize((70, 70), Image.Resampling.LANCZOS)
+
+        # Convert the image to Tkinter-compatible format
+        logo_tk = ImageTk.PhotoImage(logo_photo)
+
+        # Create a Label to display the logo
+        logo_label = ttk.Label(self.entry_frame, image=logo_tk)
+        logo_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Set the logo image as a property of the label to prevent it from being garbage collected
+        logo_label.image = logo_tk
+        label_instrucciones = ttk.Label(self.entry_frame, text="Instrucciones de la aplicación:\n1. Carga el archivo CSV.\n2. Presiona el botón 'Procesar Datos' para comenzar el trabajo.")
+        label_instrucciones.grid(row=0, column=0, columnspan=3, padx=10, pady=10) 
+
         label_ruta = ttk.Label(self.entry_frame, text="Ruta del archivo CSV:")
-        label_ruta.grid(row=0, column=0, padx=10, pady=10)
+        label_ruta.grid(row=1, column=0, padx=10, pady=10)
 
         self.entry_ruta = ttk.Entry(self.entry_frame, width=50)
-        self.entry_ruta.grid(row=0, column=1, padx=10, pady=10)
+        self.entry_ruta.grid(row=1, column=1, padx=10, pady=10)
 
         boton_cargar = ttk.Button(self.entry_frame, text="Cargar Archivo", command=self.cargar_archivo)
-        boton_cargar.grid(row=0, column=2, padx=10, pady=10)
+        boton_cargar.grid(row=1, column=2, padx=10, pady=10)
 
         boton_procesar = ttk.Button(self.entry_frame, text="Procesar Datos", command=self.procesar_datos)
-        boton_procesar.grid(row=3, column=2, columnspan=1, pady=10)
+        boton_procesar.grid(row=4, column=2, columnspan=1, pady=10)
         
         boton_llenar_forms = ttk.Button(self.check_frame, text="Llenar Forms", command=self.llenar_forms)
         boton_llenar_forms.grid(row=1, column=0, columnspan=1, pady=10)
+
 
     def llenar_forms(self):
         ruta_archivo = self.entry_ruta.get()
@@ -112,98 +130,170 @@ class App(ttk.Frame):
         # Navega a la página del formulario
         driver.get('https://docs.google.com/forms/d/e/1FAIpQLSdlsZY3VlD7CfqiB9Ftm4X8cEuvpVU76D-Ku8u9NNhu_Z5FYg/viewform')
 
-        messagebox.showinfo("Proceso completado","En cuanto inicie sesión por favor dar click aquí")
-        try:        
-            for row, data in df.iterrows():
-                zcrm = data['ZCRM']
-                storeID= data['Store ID']
-                contactB = data['Contestó?']
-                callsPE = data['que problemas calls?']
-                chatPE = data['Problemas Whats?']
-                falta = data['Estado']
-                if self.var_0.get():
-                    #Llamada
-                    driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
-                    if pd.isna(storeID):
-                        time.sleep(1)
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #set nombre
-                    else:
-                        time.sleep(1)
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+        messagebox.showinfo("Proceso completado","En cuanto inicie sesión por favor dar click aquí")       
+        for row, data in df.iterrows():
+            zcrm = data['ZCRM']
+            storeID= data['Store ID']
+            contactB = data['Contestó?']
+            callsPE = data['que problemas calls?']
+            chatPE = data['Problemas Whats?']
+            falta = data['Estado']
+            
+            if self.var_0.get() and self.var_1.get():
+                #Llamada
+                driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
+                if pd.isna(storeID):
                     time.sleep(1)
-                    if contactB == 'No' and pd.isna(callsPE):
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
-                        time.sleep(1)
-                    elif contactB == 'No' and not pd.isna(callsPE):
-                        driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
-                        time.sleep(1)
-                    elif contactB == 'Si' and pd.isna(callsPE):
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
-                        time.sleep(1)
-                    elif contactB == 'Si' and not pd.isna(callsPE):
-                        driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
-                        time.sleep(1)
-
-                    # Separa las columnas que faltan
-                    columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
-
-                    # Itera sobre las columnas que faltan y completa el formulario
-                    for columna in columnas_faltantes:
-                        # Supongamos que el formulario tiene un campo de entrada para cada columna
-                        
-                        if columna=='nan':
-                            driver.find_element('xpath',contactFalta['']).click()
-                        else:
-                            driver.find_element('xpath',contactFalta[columna]).click()
-
-                    time.sleep(1)
-                    driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
-                    time.sleep(1)
-                    #
-                    driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
-                elif self.var_1.get():
-                    #WhatsApp
-                    driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
-                    time.sleep(1)
-                    if pd.isna(storeID):
-                        time.sleep(1)
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #put nombre
-                    else:
-                        time.sleep(1)
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
-                    time.sleep(1)
-                    if pd.isna(chatPE):
-                        driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
-                        time.sleep(1)
-                    elif not pd.isna(chatPE):
-                        driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
-                        time.sleep(1)
-                    
-
-                    # Separa las columnas que faltan
-                    columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
-
-                    # Itera sobre las columnas que faltan y completa el formulario
-                    for columna in columnas_faltantes:
-                        # Supongamos que el formulario tiene un campo de entrada para cada columna
-                        if columna=='nan':
-                            driver.find_element('xpath',contactFalta['']).click()
-                        else:
-                            driver.find_element('xpath',contactFalta[columna]).click()
-                    time.sleep(1)
-                    driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
-                    time.sleep(1)
-                    driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
-                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #set nombre
                 else:
-                    driver.quit()
-        except NoSuchElementException:
-            messagebox.showerror("Error", "Error al llenar los forms")
-            driver.quit()
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                time.sleep(1)
+                if contactB == 'No' and pd.isna(callsPE):
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
+                    time.sleep(1)
+                elif contactB == 'No' and not pd.isna(callsPE):
+                    driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
+                    time.sleep(1)
+                elif contactB == 'Si' and pd.isna(callsPE):
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
+                    time.sleep(1)
+                elif contactB == 'Si' and not pd.isna(callsPE):
+                    driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
+                    time.sleep(1)
+
+                # Separa las columnas que faltan
+                columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
+
+                # Itera sobre las columnas que faltan y completa el formulario
+                for columna in columnas_faltantes:
+                    # Supongamos que el formulario tiene un campo de entrada para cada columna
+                    
+                    if columna=='nan':
+                        driver.find_element('xpath',contactFalta['']).click()
+                    else:
+                        driver.find_element('xpath',contactFalta[columna]).click()
+
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
+                time.sleep(1)
+                #
+                driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
+                #WhatsApp
+                driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
+                time.sleep(1)
+                if pd.isna(storeID):
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #put nombre
+                else:
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                time.sleep(1)
+                if pd.isna(chatPE):
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
+                    time.sleep(1)
+                elif not pd.isna(chatPE):
+                    driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
+                    time.sleep(1)
+                    
+                # Separa las columnas que faltan
+                columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
+
+                # Itera sobre las columnas que faltan y completa el formulario
+                for columna in columnas_faltantes:
+                    # Supongamos que el formulario tiene un campo de entrada para cada columna
+                    if columna=='nan':
+                        driver.find_element('xpath',contactFalta['']).click()
+                    else:
+                        driver.find_element('xpath',contactFalta[columna]).click()
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
+                time.sleep(1)
+                driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
+                time.sleep(1)
+            elif self.var_0.get() and not self.var_1.get():
+                #Llamada
+                driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
+                if pd.isna(storeID):
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #set nombre
+                else:
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                time.sleep(1)
+                if contactB == 'No' and pd.isna(callsPE):
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
+                    time.sleep(1)
+                elif contactB == 'No' and not pd.isna(callsPE):
+                    driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
+                    time.sleep(1)
+                elif contactB == 'Si' and pd.isna(callsPE):
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
+                    time.sleep(1)
+                elif contactB == 'Si' and not pd.isna(callsPE):
+                    driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
+                    time.sleep(1)
+
+                # Separa las columnas que faltan
+                columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
+
+                # Itera sobre las columnas que faltan y completa el formulario
+                for columna in columnas_faltantes:
+                    # Supongamos que el formulario tiene un campo de entrada para cada columna
+                    
+                    if columna=='nan':
+                        driver.find_element('xpath',contactFalta['']).click()
+                    else:
+                        driver.find_element('xpath',contactFalta[columna]).click()
+
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
+                time.sleep(1)
+                #
+                driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
+            elif not self.var_0.get() and self.var_1.get():
+                #WhatsApp
+                driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
+                time.sleep(1)
+                if pd.isna(storeID):
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(zcrm) #put nombre
+                else:
+                    time.sleep(1)
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                time.sleep(1)
+                if pd.isna(chatPE):
+                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
+                    time.sleep(1)
+                elif not pd.isna(chatPE):
+                    driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
+                    time.sleep(1)
+                    
+                    # Separa las columnas que faltan
+                columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
+
+                # Itera sobre las columnas que faltan y completa el formulario
+                for columna in columnas_faltantes:
+                    # Supongamos que el formulario tiene un campo de entrada para cada columna
+                    if columna=='nan':
+                        driver.find_element('xpath',contactFalta['']).click()
+                    else:
+                        driver.find_element('xpath',contactFalta[columna]).click()
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
+                time.sleep(1)
+                driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
+                time.sleep(1)
+            else:
+                driver.quit()
     def cargar_archivo(self):
         ruta_archivo = filedialog.askopenfilename(title="Seleccionar archivo CSV", filetypes=[("Archivos CSV", "*.csv")])
         if ruta_archivo:
@@ -666,9 +756,6 @@ if __name__ == "__main__":
     root.geometry("+{}+{}".format(x_cordinate, y_cordinate-20))
 
     root.mainloop()
-
-
-
 
 
 
