@@ -15,38 +15,50 @@ from PIL import Image, ImageTk
 import os
 
 
-contactType_dict={'Buzón':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
-    'No contesta llamada': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]',
-    'No enlaza llamada': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[5]',
-    'Fuera de servicio': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[6]',
-    'Número no existe': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[7]',
-    'Llamada sin audio': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[8]',
-    'Número equivocado': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[9]',
-    'Falta de interacción en chat': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]',
-    'No contesta correo': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[11]',
-    'Cuelga llamada': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[12]',
-    'Volver a llamar': '//*[@id="mG61Hd"]/div[2]/div/div [2]/div[3]/div/div/div[2]/div/div[2]/div[13]',
-    'Aliado no desea continuar su proceso': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[14]',
-    'Ya no es restaurante': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[15]',
-    'Presenta Bug/Incidencia en plataforma': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[16]',
-    'Pendiente por revisión': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[17]',
-    'Ayuda subir información': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[18]',
-    'Compromete subir información': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]',
-    'Problemas con credenciales': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[20]',
-    'Ayuda por rechazo': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[21]',
-    'Incidencias onboarding': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[22]',
-    'Envía correo': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[23]',
-    'Resuelven dudas': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[24]'
+contactCountry_dict={'Argentina':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
+    'Brasil': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]',
+    'Chile': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[5]',
+    'Colombia': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[6]',
+    'Costa Rica': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[7]',
+    'Ecuador': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[8]',
+    'Mexico': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[9]',
+    'Peru': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]',
+    'Uruguay': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[11]',
+}
+contactType_dict={'Buzón':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[3]',
+    'No contesta llamada': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[4]',
+    'No enlaza llamada': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[5]',
+    'Fuera de servicio': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[6]',
+    'Número no existe': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[7]',
+    'Llamada sin audio': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[8]',
+    'Número equivocado': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[9]',
+    'Falta de interacción en chat': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[10]',
+    'No contesta correo': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[11]',
+    'Cuelga llamada': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[12]',
+    'Volver a llamar': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[13]',
+    'Aliado no desea continuar su proceso': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[14]',
+    'Ya no es restaurante': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[15]',
+    'Presenta Bug/Incidencia en plataforma': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[16]',
+    'Pendiente por revisión': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[17]',
+    'Ayuda subir información': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[18]',
+    'Compromete subir información': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[19]',
+    'Problemas con credenciales': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[20]',
+    'Ayuda por rechazo': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[21]',
+    'Incidencias onboarding': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[22]',
+    'Envía correo': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[23]',
+    'Resuelven dudas': '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[24]',
+    'Rechazada por Flujo de BE':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[25]',
+    'Fuera de Cobertura':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[2]/div[26]'
 }
 
 contactFalta = {
-    'TYC':'//*[@id="i21"]',
-    'Inf Ban.': '//*[@id="i27"]',
-    'Hor.': '//*[@id="i39"]',
-    'Menu': '//*[@id="i30"]',
-    'H&L': '//*[@id="i33"]',
-    'Doc':'//*[@id="i36"]',
-    '':'//*[@id="i42"]'
+    'TYC':'//*[@id="i25"]',
+    'Inf Ban.': '//*[@id="i31"]',
+    'Hor.': '//*[@id="i43"]',
+    'Menu': '//*[@id="i34"]',
+    'H&L': '//*[@id="i37"]',
+    'Doc':'//*[@id="i40"]',
+    '':'//*[@id="i46"]'
 }
 
 
@@ -136,6 +148,7 @@ class App(ttk.Frame):
         messagebox.showinfo("Proceso completado","En cuanto inicie sesión por favor dar click aquí")       
         for row, data in df.iterrows():
             zcrm = data['ZCRM']
+            country = data['País']
             storeID= data['Store ID']
             contactB = data['Contestó?']
             callsPE = data['que problemas calls?']
@@ -151,16 +164,21 @@ class App(ttk.Frame):
                 else:
                     time.sleep(1)
                     driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                    
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #País
+                time.sleep(1)
+                driver.find_element('xpath', contactCountry_dict[country]).click() # seleccionar País
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
                 time.sleep(1)
                 if contactB == 'No' and pd.isna(callsPE):
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
+                    driver.find_element('xpath', contactType_dict['No contesta llamada']).click() #Tipo de contacto
                     time.sleep(1)
                 elif contactB == 'No' and not pd.isna(callsPE):
                     driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
                     time.sleep(1)
                 elif contactB == 'Si' and pd.isna(callsPE):
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
+                    driver.find_element('xpath', contactType_dict['Compromete subir información']).click() #Tipo de contacto
                     time.sleep(1)
                 elif contactB == 'Si' and not pd.isna(callsPE):
                     driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
@@ -179,7 +197,7 @@ class App(ttk.Frame):
                         driver.find_element('xpath',contactFalta[columna]).click()
 
                 time.sleep(1)
-                driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
+                driver.find_element('xpath', '//*[@id="i62"]').click() #Canal Comunicación (Llamada)
                 driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
                 time.sleep(1)
                 #
@@ -193,10 +211,15 @@ class App(ttk.Frame):
                 else:
                     time.sleep(1)
                     driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                    
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #País
+                time.sleep(1)
+                driver.find_element('xpath', contactCountry_dict[country]).click() # seleccionar País
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
                 time.sleep(1)
                 if pd.isna(chatPE):
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
+                    driver.find_element('xpath', contactType_dict['Falta de interacción en chat']).click() #Tipo de contacto
                     time.sleep(1)
                 elif not pd.isna(chatPE):
                     driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
@@ -213,7 +236,7 @@ class App(ttk.Frame):
                     else:
                         driver.find_element('xpath',contactFalta[columna]).click()
                 time.sleep(1)
-                driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
+                driver.find_element('xpath', '//*[@id="i56"]').click() #Canal Comunicación (WhatsApp)
                 driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
                 time.sleep(1)
                 driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
@@ -227,16 +250,21 @@ class App(ttk.Frame):
                 else:
                     time.sleep(1)
                     driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #set StoreID
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                    
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #País
+                time.sleep(1)
+                driver.find_element('xpath', contactCountry_dict[country]).click() # seleccionar País
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
                 time.sleep(1)
                 if contactB == 'No' and pd.isna(callsPE):
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[4]').click() #Tipo de contacto
+                    driver.find_element('xpath', contactType_dict['No contesta llamada']).click() #Tipo de contacto
                     time.sleep(1)
                 elif contactB == 'No' and not pd.isna(callsPE):
                     driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
                     time.sleep(1)
                 elif contactB == 'Si' and pd.isna(callsPE):
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[19]').click() #Tipo de contacto
+                    driver.find_element('xpath', contactType_dict['Compromete subir información']).click() #Tipo de contacto
                     time.sleep(1)
                 elif contactB == 'Si' and not pd.isna(callsPE):
                     driver.find_element('xpath', contactType_dict[callsPE]).click() #Tipo de contacto
@@ -255,7 +283,7 @@ class App(ttk.Frame):
                         driver.find_element('xpath',contactFalta[columna]).click()
 
                 time.sleep(1)
-                driver.find_element('xpath', '//*[@id="i58"]').click() #Canal Comunicación (Llamada)
+                driver.find_element('xpath', '//*[@id="i62"]').click() #Canal Comunicación (Llamada)
                 driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (Llamada)
                 time.sleep(1)
                 #
@@ -270,16 +298,21 @@ class App(ttk.Frame):
                 else:
                     time.sleep(1)
                     driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[2]/div/div/div[2]/div/div[1]/div[2]/textarea').send_keys(storeID) #put StoreID
-                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
+                    
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #País
+                time.sleep(1)
+                driver.find_element('xpath', contactCountry_dict[country]).click() # seleccionar País
+                time.sleep(1)
+                driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[4]/div/div/div[2]/div/div[1]/div[1]/div[1]').click() #Tipo de contacto
                 time.sleep(1)
                 if pd.isna(chatPE):
-                    driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[10]').click() #Tipo de contacto
+                    driver.find_element('xpath', contactType_dict['Falta de interacción en chat']).click() #Tipo de contacto
                     time.sleep(1)
                 elif not pd.isna(chatPE):
                     driver.find_element('xpath', contactType_dict[chatPE]).click() #Tipo de contacto
                     time.sleep(1)
                     
-                    # Separa las columnas que faltan
+                # Separa las columnas que faltan
                 columnas_faltantes = [columna.strip() for columna in str(falta).replace("Falta:", "").split(",")]
 
                 # Itera sobre las columnas que faltan y completa el formulario
@@ -290,7 +323,7 @@ class App(ttk.Frame):
                     else:
                         driver.find_element('xpath',contactFalta[columna]).click()
                 time.sleep(1)
-                driver.find_element('xpath', '//*[@id="i52"]').click() #Canal Comunicación (WhatsApp)
+                driver.find_element('xpath', '//*[@id="i56"]').click() #Canal Comunicación (WhatsApp)
                 driver.find_element('xpath', '//*[@id="mG61Hd"]/div[2]/div/div[3]/div[2]/div[1]/div/span').click() #Enviar (WhatsApp)
                 time.sleep(1)
                 driver.find_element('xpath', '/html/body/div[1]/div[2]/div[1]/div/div[4]/a').click() #again
@@ -477,7 +510,7 @@ class App(ttk.Frame):
 
             # Agregar columna "Entry problemas call"
             stringPCall_var = tk.StringVar()
-            entry_problemasCall = ttk.OptionMenu(frame_datos,stringPCall_var, *['','','Buzón','No enlaza llamada','Fuera de servicio','Número no existe','Llamada sin audio','Número equivocado','Cuelga llamada','Volver a llamar', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
+            entry_problemasCall = ttk.OptionMenu(frame_datos,stringPCall_var, *['','','Buzón','No enlaza llamada','Fuera de servicio','Número no existe','Llamada sin audio','Número equivocado','Cuelga llamada','Volver a llamar', 'Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas','Rechazada por Flujo de BE','Fuera de Cobertura'])
             entry_problemasCall.config(width=5)
             entry_problemasCall.grid(row=call * 4 + 2, column=5, padx=10, pady=10)
             entry_problemasCall.nombre_opcion = "problemas_call"
@@ -487,7 +520,7 @@ class App(ttk.Frame):
 
             # Agregar columna "Entry problemas Whats"
             stringPWhats_var = tk.StringVar()
-            entry_problemasWhats = ttk.OptionMenu(frame_datos, stringPWhats_var, *['','','Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas'])
+            entry_problemasWhats = ttk.OptionMenu(frame_datos, stringPWhats_var, *['','','Aliado no desea continuar su proceso', 'Ya no es restaurante','Presenta Bug/Incidencia en plataforma', 'Pendiente por revisión','Ayuda subir información','Problemas con credenciales','Ayuda por rechazo', 'Incidencias onboarding','Resuelven dudas','Rechazada por Flujo de BE','Fuera de Cobertura'])
             entry_problemasWhats.config(width=5)
             entry_problemasWhats.grid(row=call * 4 + 2, column=6, padx=10, pady=10)
             entry_problemasWhats.nombre_opcion = "problemas_whats"
@@ -696,7 +729,7 @@ class App(ttk.Frame):
         datos_exportar = []
 
         # Encabezados del archivo CSV
-        encabezados = ["ZCRM" ,"Onboarding Name", "Telefono 1", "Store ID", "Comentarios", "Estado", "Contestó?","que problemas calls?","Problemas Whats?"]
+        encabezados = ["ZCRM" , "País", "Onboarding Name", "Telefono 1", "Store ID", "Comentarios", "Estado", "Contestó?","que problemas calls?","Problemas Whats?"]
 
         # Agregar encabezados a la lista de datos
         datos_exportar.append(encabezados)
@@ -708,6 +741,10 @@ class App(ttk.Frame):
             # Agregar los datos de la columna "ZCRM"
             valor_zcrm = str(data["ZCRM"].iloc[call])
             fila_datos.append(valor_zcrm)
+
+            # Agregar los datos de la columna "Pais"
+            valor_pais = str(data["País"].iloc[call])
+            fila_datos.append(valor_pais)
 
             for i, entry_widget in enumerate(entry_widgets[call * 9:(call + 1) * 9]):
                 if isinstance(entry_widget, tk.Entry):
