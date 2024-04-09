@@ -132,7 +132,7 @@ class App(ttk.Frame):
         ruta_archivo = self.entry_ruta.get()
         df= pd.read_csv(''+ruta_archivo+'')
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        driver_path = os.path.join(script_dir, "chromedriver")
+        driver_path = os.path.join(script_dir, "chromedriver.exe")
         # Configura el path al controlador de Chrome
         service = Service(executable_path=driver_path)
 
@@ -566,7 +566,7 @@ class App(ttk.Frame):
 
     def sendWhats(self, database, agente, nCalls):
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        driver_path = os.path.join(script_dir, "chromedriver")
+        driver_path = os.path.join(script_dir, "chromedriver.exe")
         # Configura el path al controlador de Chrome
         service = Service(executable_path=driver_path)
 
@@ -594,7 +594,7 @@ class App(ttk.Frame):
             pais =data['País']
 
             driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/div/a').click()#Click en agregar contactos
-            time.sleep(0.6)
+            time.sleep(0.78)
             # Dividir la cadena en función del carácter especial
             subcadenas = str(nombre).split("|")
 
@@ -607,93 +607,107 @@ class App(ttk.Frame):
                 parte_deseada = nombre
             
             driver.find_element('xpath', '//*[@id="name"]').send_keys(parte_deseada)#Sendkeys nombre del contacto
-            time.sleep(0.6)
+            time.sleep(0.78)
                 
             
             if pais == "Colombia":
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/dialog/div/footer/button[2]').click()#click agregar contacto
-                time.sleep(0.6)
+                time.sleep(0.78)
             elif pais == "Mexico":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[4]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Mexico")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[2]').click()
+                time.sleep(0.78)
 
             elif pais == "Peru":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[174]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Peru")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[2]').click()
+                time.sleep(0.78)
 
             elif pais == "Argentina":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Argentina")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[2]').click()
+                time.sleep(0.78)
 
             elif pais == "Costa Rica":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[3:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[51]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Costa Rica")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button').click()
+                time.sleep(0.78)
 
             elif pais == "Uruguay":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[3:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[234]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Uruguay")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[2]').click()
+                time.sleep(0.78)
 
             elif pais == "Chile":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[48]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Chile")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[3]').click()
+                time.sleep(0.78)
             elif pais == "Ecuador":
                 #
                 driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[3:])#send keys celular (por defecto en colombia)
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.6)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[64]').click()
-                time.sleep(0.6)
+                time.sleep(0.78)
+                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Ecuador")#buscar pais
+                time.sleep(1)
+                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[2]').click()
+                time.sleep(0.78)
             
             driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/footer/button[2]').click()#click agregar contacto
-            time.sleep(0.6)
+            time.sleep(0.78)
             # Verificar si el elemento está presente en la página
             try:
                 if driver.find_element(By.XPATH, '//*[@id="cellphone-error"]'):
                     driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/footer/button[1]').click()#click en cancelar
-                    time.sleep(0.6)
+                    time.sleep(0.78)
                 else:
                     print("El elemento no está presente en la página")
-                    time.sleep(0.6)
+                    time.sleep(0.78)
             except NoSuchElementException:
                 print("El elemento no está presente en la página")
-                time.sleep(0.6)
+                time.sleep(0.78)
 
             try:
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/div/button').click()#click en buscar
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(cell)#SendKeys nombre del contacto
                 time.sleep(2)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/div/div[1]/a[2]/div').click()#click en el primero que aparezca
@@ -712,24 +726,24 @@ class App(ttk.Frame):
                         print(f"No se pudo encontrar el elemento con ninguno de los XPaths proporcionados.")
                         time.sleep(1.3)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/label/div/div/input').send_keys("interacción_r2s")#SendKeys R2S
-                time.sleep(1.5)
+                time.sleep(1.9)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/div/a').click()#Click en la plantilla
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/button').click()#Click en enviar plantilla
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/dialog/div/div/div/label[1]').click()#click en el número
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/dialog/div/footer/button[2]').click()#click siguiente
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '//*[@id="agente"]').send_keys(agente)#SendKeys el nombre del agente
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/dialog/div/footer/button[2]').click()#click en enviar
-                time.sleep(0.6)
+                time.sleep(0.78)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/button').click()# darle a la x
-                time.sleep(0.6)
+                time.sleep(0.78)
             except:
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/button').click()# darle a la x
-                time.sleep(0.6)
+                time.sleep(0.78)
             #Se repite :D
     def exportar_a_csv(self, entry_widgets, nCalls, checkbutton_vars, data, stringPCall_vars, stringPWhats_vars):
             # Generar un nombre sugerido basado en la fecha y hora actual
