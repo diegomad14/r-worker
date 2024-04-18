@@ -14,6 +14,7 @@ from datetime import datetime
 from PIL import Image, ImageTk
 import os
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 
 contactCountry_dict={'Argentina':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
@@ -738,6 +739,7 @@ class App(ttk.Frame):
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/div/button').click()#click en buscar
                 time.sleep(1.01)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(cell)#SendKeys nombre del contacto
+                driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(Keys.ENTER)#SendKeys nombre del contacto
                 time.sleep(2)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/div/div[1]/a[2]/div').click()#click en el primero que aparezca
                 time.sleep(2)
@@ -755,6 +757,7 @@ class App(ttk.Frame):
                         print(f"No se pudo encontrar el elemento con ninguno de los XPaths proporcionados.")
                         time.sleep(1.3)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/label/div/div/input').send_keys("interacción_r2s")#SendKeys R2S
+                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/label/div/div/input').send_keys(Keys.ENTER)#SendKeys nombre del contacto
                 time.sleep(1.9)
                 driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/div/a').click()#Click en la plantilla
                 time.sleep(1.3)
