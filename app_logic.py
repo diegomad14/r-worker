@@ -739,8 +739,9 @@ class App(ttk.Frame):
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/div/button').click()#click en buscar
                 time.sleep(0.9)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(cell)#SendKeys nombre del contacto
+                time.sleep(1)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(Keys.ENTER)#SendKeys nombre del contacto
-                time.sleep(2)
+                time.sleep(1)
                 driver.find_element('xpath', '/html/body/div/main/div/div[1]/div/div[1]/a[2]/div').click()#click en el primero que aparezca
                 time.sleep(2)
             
