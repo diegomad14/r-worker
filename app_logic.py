@@ -13,8 +13,13 @@ from tkinter import BooleanVar
 from datetime import datetime
 from PIL import Image, ImageTk
 import os
+import ctypes
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
+
 
 
 contactCountry_dict={'Argentina':'//*[@id="mG61Hd"]/div[2]/div/div[2]/div[3]/div/div/div[2]/div/div[2]/div[3]',
@@ -133,7 +138,7 @@ class App(ttk.Frame):
         ruta_archivo = self.entry_ruta.get()
         df= pd.read_csv(''+ruta_archivo+'')
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        driver_path = os.path.join(script_dir, "chromedriver")
+        driver_path = os.path.join(script_dir, "chromedriver.exe")
         # Configura el path al controlador de Chrome
         service = Service(executable_path=driver_path)
 
@@ -157,6 +162,9 @@ class App(ttk.Frame):
             chatPE = data['Problemas Whats?']
             falta = data['Estado']
             
+            # Mantener activa la pantalla mientras se ejecuta sendWhats
+            ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)  # Mantener la pantalla activa
+
             if self.var_0.get() and self.var_1.get():
                 #Llamada
                 driver.find_element('xpath', '//*[@id="i5"]').click() #Correo
@@ -345,11 +353,17 @@ class App(ttk.Frame):
             # Cargar el archivo CSV en un DataFrame
             datos_clientes = pd.read_csv(ruta_archivo)
 
+            # Eliminar espacios en blanco alrededor de cada cadena en la columna 'Agente'
+            datos_clientes['Agente'] = datos_clientes['Agente'].str.strip()
+
             # Extraer nombres de agentes no repetidos
             agentes = datos_clientes['Agente'].unique()
 
             # Mostrar una ventana para que el usuario elija un agente
             agente_seleccionado = self.elegir_agente(agentes)
+
+            # Eliminar espacios en blanco alrededor del agente seleccionado
+            agente_seleccionado = agente_seleccionado.strip()
 
             # Filtrar los datos según el agente seleccionado
             datos_filtrados = datos_clientes[datos_clientes['Agente'] == agente_seleccionado]
@@ -435,10 +449,15 @@ class App(ttk.Frame):
         # Permitir desplazamiento con la rueda del ratón
         ventana_datos_relevantes.bind_all("<MouseWheel>", self.on_mousewheel)
 
+        # Función para minimizar la ventana de datos relevantes
+        def minimizar_ventana():
+            ventana_datos_relevantes.iconify()  # Minimizar la ventana
+            self.sendWhats(database=data, agente=agente, nCalls=nCalls)  # Llamar a la función sendWhats después de minimizar la ventana
+
         # Botón "Enviar WhatsApps" en la parte superior izquierda
-        boton_whatsapp = ttk.Button(frame_datos, text="Enviar WhatsApps", command=lambda: self.sendWhats(database=data, agente=agente, nCalls=nCalls))
+        boton_whatsapp = ttk.Button(frame_datos, text="Enviar WhatsApps", command=minimizar_ventana)
         boton_whatsapp.grid(row=0, column=0, columnspan=3, pady=10, padx=10, sticky="w")
-        
+
         # Botón para exportar CSV
         boton_exportar_csv = ttk.Button(frame_datos, text="Exportar CSV", command=lambda: self.exportar_a_csv(entry_widgets, nCalls, checkbutton_vars, data, stringPCall_vars, stringPWhats_vars))
         boton_exportar_csv.grid(row=0, column=1, pady=10, padx=10, sticky="e")
@@ -596,7 +615,7 @@ class App(ttk.Frame):
 
     def sendWhats(self, database, agente, nCalls):
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        driver_path = os.path.join(script_dir, "chromedriver")
+        driver_path = os.path.join(script_dir, "chromedriver.exe")
         # Configura el path al controlador de Chrome
         service = Service(executable_path=driver_path)
 
@@ -609,12 +628,13 @@ class App(ttk.Frame):
 
         # Abre una nueva pestaña en el navegador con la página https://sales.treble.ai/
         driver.get('https://sales.treble.ai/')
+        wait = WebDriverWait(driver, 6)
 
         messagebox.showinfo("WhatsApp", "Al iniciar sesión en treble por favor dar click en Ok")
         time.sleep(1)
 
-        driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/nav/a[2]').click() #Click en contactos
-        time.sleep(1)
+        button_contacts = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div[3]/main/div/div[1]/header/nav/a[2]'))) #Encontrar el botón de contactos
+        button_contacts.click() #Click en contactos
         for iteration, (index, data) in enumerate(database.iterrows()):
             if iteration >= nCalls:
                 break  # Salir del bucle después de nCalls iteraciones
@@ -623,161 +643,220 @@ class App(ttk.Frame):
             nombre = data['Onboarding Name']
             pais =data['País']
 
-            driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/div/a').click()#Click en agregar contactos
-            time.sleep(0.9)
-            # Dividir la cadena en función del carácter especial
-            subcadenas = str(nombre).split("|")
+            # Mantener activa la pantalla mientras se ejecuta sendWhats
+            ctypes.windll.kernel32.SetThreadExecutionState(0x80000002)  # Mantener la pantalla activa
 
-            # Verificar si se encontró el carácter especial
-            if len(subcadenas) > 1:
-                # Si se encontró, tomar la primera subcadena
-                parte_deseada = subcadenas[0]
-            else:
-                # Si no se encontró, mantener la cadena original
-                parte_deseada = nombre
-            
-            driver.find_element('xpath', '//*[@id="name"]').send_keys(parte_deseada)#Sendkeys nombre del contacto
-            time.sleep(0.9)
-                
-            
-            if pais == "Colombia":
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/footer/button[2]').click()#click agregar contacto
-                time.sleep(0.9)
-            elif pais == "Mexico":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Mexico")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.9)
-
-            elif pais == "Peru":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Peru")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.9)
-
-            elif pais == "Argentina":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Argentina")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.9)
-
-            elif pais == "Costa Rica":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[3:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Costa Rica")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button').click()
-                time.sleep(0.9)
-
-            elif pais == "Uruguay":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[3:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Uruguay")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.9)
-
-            elif pais == "Chile":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[2:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Chile")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.9)
-            elif pais == "Ecuador":
-                #
-                driver.find_element('xpath', '//*[@id="cellphone"]').send_keys(str(cell)[3:])#send keys celular (por defecto en colombia)
-                time.sleep(0.9)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/button').click()
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input').send_keys("Ecuador")#buscar pais
-                time.sleep(1)
-                driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]').click()
-                time.sleep(0.9)
-            
-            driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/footer/button[2]').click()#click agregar contacto
-            time.sleep(1)
-            # Verificar si el elemento está presente en la página
             try:
-                if driver.find_element(By.XPATH, '//*[@id="cellphone-error"]'):
-                    driver.find_element(By.XPATH, '/html/body/div/main/div/dialog/div/footer/button[1]').click()#click en cancelar
-                    time.sleep(0.9)
+                button_add_contacts = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[1]/header/div/div/a'))) #Encontrar el botón de agregar contacto
+                button_add_contacts.click() #Click en agregar contacto
+                # Dividir la cadena en función del carácter especial
+                subcadenas = str(nombre).split("|")
+
+                # Verificar si se encontró el carácter especial
+                if len(subcadenas) > 1:
+                    # Si se encontró, tomar la primera subcadena
+                    parte_deseada = subcadenas[0]
                 else:
-                    print("El elemento no está presente en la página")
-                    time.sleep(0.9)
-            except NoSuchElementException:
-                print("El elemento no está presente en la página")
-                time.sleep(0.9)
+                    # Si no se encontró, mantener la cadena original
+                    parte_deseada = nombre
 
-            try:
-                driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/div/button').click()#click en buscar
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(cell)#SendKeys nombre del contacto
-                time.sleep(1)
-                driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/input').send_keys(Keys.ENTER)#SendKeys nombre del contacto
-                time.sleep(1)
-                driver.find_element('xpath', '/html/body/div/main/div/div[1]/div/div[1]/a[2]/div').click()#click en el primero que aparezca
-                time.sleep(2)
-            
+                input_name = wait.until(EC.element_to_be_clickable((By.XPATH,'//*[@id="name"]'))) #Encontrar el input de nombre
+                input_name.send_keys(parte_deseada) #Enviar el nombre del contacto
+                input_cellphone = wait.until(EC.element_to_be_clickable((By.XPATH,'//*[@id="cellphone"]'))) #Encontrar el input de celular     
+                button_add_contact = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/dialog/div/footer/button[2]'))) #Encontrar el botón de agregar contacto
+                comboBox_country = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/dialog/div/form/div/div/div[1]/button'))) #Encontrar el comboBox de país
+                comboBox_country.click()#click comboBox
+                input_country = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/div/label/div/div/input'))) #Encontrar el input de país
+                button_cancel = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/dialog/div/footer/button[1]'))) #Encontrar el botón de cancelar
+                if pais == "Colombia":
+                    input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                    
+                elif pais == "Mexico":
+                    #
+                    input_country.send_keys("Mexico") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Mexico'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+
+                elif pais == "Peru":
+                    #
+                    input_country.send_keys("Peru") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Peru'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+
+                elif pais == "Argentina":
+                    #
+                    input_country.send_keys("Argentina") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Argentina'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+
+                elif pais == "Costa Rica":
+                    #
+                    input_country.send_keys("Costa Rica") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Costa Rica'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+
+                elif pais == "Uruguay":
+                    #
+                    input_country.send_keys("Uruguay") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Uruguay'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+
+                elif pais == "Chile":
+                    #
+                    input_country.send_keys("Chile") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Chile'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+                elif pais == "Ecuador":
+                    #
+                    input_country.send_keys("Ecuador") #Enviar el nombre del país
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]'), 'Ecuador'))
+                    # Intentar hacer clic en el botón después de volver a localizarlo en caso de excepción StaleElementReferenceException
+                    retries = 3  # Número máximo de intentos
+                    while retries > 0:
+                        try:
+                            click_button = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div/main/div/dialog/div/form/div/div/div[1]/div/button[1]')))
+                            click_button.click() #Click en el botón
+                            input_cellphone.send_keys(str(cell)[2:])#send keys celular
+                            break  # Salir del bucle si se hizo clic exitosamente
+                        except:
+                            retries -= 1  # Intentar nuevamente si se produce una excepción
+                            continue
+                
+                button_add_contact.click()#click agregar contacto
+                # Configurar un tiempo de espera específico para esta parte del código
+                wait_custom = WebDriverWait(driver, 5)  # Tiempo de espera de 5 segundos
+
                 try:
-
-                    driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/a').click()# si el gestor de platillas está en el centro
-                    time.sleep(1.3)
-                except NoSuchElementException:
-                    # Si no se encuentra el elemento con el primer XPath, intenta con el segundo
+                    # Esperar hasta que el elemento esté visible
+                    element_present = wait_custom.until(EC.visibility_of_element_located((By.XPATH, '//*[@id="cellphone-error"]')))
+                    
+                    # Verificar si el texto está presente en el elemento
+                    if 'Celular ya en uso' in element_present.text:
+                        button_cancel.click()  # Hacer clic en cancelar si el texto está presente
+                    elif 'Invalid cellphone' in element_present.text:
+                        button_cancel.click()  # Hacer clic en cancelar si el texto está presente
+                    else:
+                        time.sleep(0.9)
+                except TimeoutException:
+                    # Si el elemento no está presente o no es visible dentro del tiempo de espera especificado
+                    time.sleep(0.9)
+                try:
+                    button_search = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[1]/header/div/div/button'))) #Encontrar el botón de buscar
+                    button_search.click()#click en buscar
+                    textBox_search = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[1]/header/div/label/div/div/input'))) #Encontrar el textBox de buscar
+                    textBox_search.send_keys(cell)#SendKeys nombre del contacto
+                    textBox_search.send_keys(Keys.ENTER)#SendKeys nombre del contacto
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/div[1]/div/div[1]/a[2]/div'), str(cell)[3:]))
+                    first_contact = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[1]/div/div[1]/a[2]/div'))) #Encontrar el primer contacto de la lista
+                    first_contact.click()#click en el primer contacto
+                
                     try:
-                        driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/div[2]/a').click()# si el gestor de platillas está abajo
-                        time.sleep(1.3)
-                    except NoSuchElementException:
-                        print(f"No se pudo encontrar el elemento con ninguno de los XPaths proporcionados.")
-                        time.sleep(1.3)
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/label/div/div/input').send_keys("interacción_r2s")#SendKeys R2S
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/label/div/div/input').send_keys(Keys.ENTER)#SendKeys nombre del contacto
-                time.sleep(2)
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/div/a').click()#Click en la plantilla
-                time.sleep(1.3)
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/button').click()#Click en enviar plantilla
-                time.sleep(1.3)
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/dialog/div/div/div/label[1]').click()#click en el número
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/dialog/div/footer/button[2]').click()#click siguiente
-                time.sleep(0.9)
-                driver.find_element('xpath', '//*[@id="agente"]').send_keys(agente)#SendKeys el nombre del agente
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/div[2]/div/div/dialog/div/footer/button[2]').click()#click en enviar
-                time.sleep(0.9)
-                driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/button').click()# darle a la x
-                time.sleep(0.9)
+                        # Configurar un tiempo de espera diferente solo para esta parte del código
+                        wait_short = WebDriverWait(driver, 3)  # Tiempo de espera corto de 3 segundos
+
+                        # Intentar hacer clic en el elemento cuando está en el centro
+                        button_HSM_center = wait_short.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/a')))
+                        button_HSM_center.click()
+                    except TimeoutException:
+                        try:
+                            # Si no se encuentra el elemento con el primer XPath, intenta con el segundo
+                            button_HSM_bottom = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/div[2]/a')))
+                            button_HSM_bottom.click()  # si el gestor de plantillas está abajo
+                        except TimeoutException:
+                            print(f"No se pudo encontrar el elemento con ninguno de los XPaths proporcionados.")
+                            time.sleep(1.3)  # Puedes ajustar este tiempo de espera según sea necesario
+                    input_HSM = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/label/div/div/input')))#Encontrar el input de HSM
+                    input_HSM.send_keys("interacción_r2s")#SendKeys R2S
+                    input_HSM.send_keys(Keys.ENTER)#SendKeys nombre del contacto
+                    wait.until(EC.text_to_be_present_in_element((By.XPATH, '/html/body/div/main/div/div[2]/div/div/div/a'), 'interaccion_r2s'))
+                    first_template = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/div/a'))) #Encontrar la primera plantilla
+                    first_template.click()#click en la primera plantilla
+                    button_send_template = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/button'))) #Encontrar el botón de enviar plantilla
+                    button_send_template.click()#Click en enviar plantilla
+                    button_select_number = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/dialog/div/div/div/label[1]'))) #Encontrar el botón de seleccionar número
+                    button_select_number.click()#click en el número
+                    button_next = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/dialog/div/footer/button[2]'))) #Encontrar el botón de siguiente
+                    button_next.click()#click siguiente
+                    input_agent = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="agente"]')))
+                    input_agent.send_keys(agente)#SendKeys el nombre del agente
+                    button_send_message = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[2]/div/div/dialog/div/footer/button[2]'))) #Encontrar el botón de enviar mensaje
+                    button_send_message.click()#click en enviar
+                    time.sleep(1)
+                    button_x = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[1]/header/div/label/div/div/button'))) #Encontrar el botón de x
+                    button_x.click()# darle a la x
+                except:
+                    button_x = wait.until(EC.element_to_be_clickable((By.XPATH,'/html/body/div/main/div/div[1]/header/div/label/div/div/button'))) #Encontrar el botón de x
+                    button_x.click()# darle a la x
+                #Se repite :D
             except:
-                driver.find_element('xpath', '/html/body/div/main/div/div[1]/header/div/label/div/div/button').click()# darle a la x
-                time.sleep(1.3)
-            #Se repite :D
+                try:
+                    button_cancel.click()  # Hacer clic en cancelar si el texto está presente
+                except:
+                    print("Error")
+                try:
+                    button_x.click()# darle a la x
+                except:
+                    print("Error")
     def exportar_a_csv(self, entry_widgets, nCalls, checkbutton_vars, data, stringPCall_vars, stringPWhats_vars):
             # Generar un nombre sugerido basado en la fecha y hora actual
         nombre_sugerido = "datos_relevantes_" + datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv"
